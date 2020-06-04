@@ -13,6 +13,24 @@ require 'json'
 set :bind, '0.0.0.0'
 set :port, 4567
 
+# Add auth for admin
+helpers do
+  def protected!
+    return if authorized?
+    headers['WWW-Authenticate'] = 'Basic realm="Restricted Area"'
+    halt 401, "Not authorized\n"
+  end
+
+  def authorized?
+    @auth ||=  Rack::Auth::Basic::Request.new(request.env)
+    @auth.provided? and @auth.basic? and @auth.credentials and @auth.credentials == [ADMIN_USER, ADMIN_PASS]
+  end
+end
+
+# Admin userpass
+ADMIN_USER = ENV['ADMIN_USER']
+ADMIN_PASS = ENV['ADMIN_PASS']
+
 # Set up logger
 LOGGER = Logger.new(STDOUT)
 LOGGER.level = ENV['LOGGER_LEVEL'].nil? ? "info" : ENV['LOGGER_LEVEL']
@@ -26,6 +44,7 @@ DB_PASS = ENV['DB_PASS'].nil? ? "" : ENV['DB_PASS']
 DB_HOST = ENV['DB_HOST'].nil? ? "localhost" : ENV['DB_HOST']
 DB_PORT = ENV['DB_PORT'].nil? ? "3306" : ENV['DB_PORT']
 DB_DATABASE = ENV['DB_DATABASE'].nil? ? "snowrabbit" : ENV['DB_DATABASE']
+DB_DATABASE_PATH = ENV['DB_DATABASE_PATH'].nil? ? "/var/lib/db" : ENV['DB_DATABASE_PATH']
 
 if DB_TYPE == "sqlite"
   if DB_DATABASE_PATH.nil?
@@ -200,17 +219,20 @@ end
 
 
 get '/admin' do
+  protected!
   erb :admin
 end
 
 
 get '/admin/metric_list' do
+  protected!
   @ping_metrics = DB_CONNECTION[:ping_metrics].limit(50).order(Sequel.desc(:timestamp)) 
   erb :admin_metric_list
 end
 
 
 get '/admin/probe_list' do
+  protected!
   @probes = DB_CONNECTION[:probes].where(active: 1)
   @probes_unregistered = DB_CONNECTION[:probes].where(active: 2)
   @probes_inactive = DB_CONNECTION[:probes].where(active: 0)

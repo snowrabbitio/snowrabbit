@@ -16,32 +16,48 @@ function initDataSubmit() {
 		let baseUrl = '/admin/probe_update';
 		let row = button.closest('tr');
 
-                let newSite = row.find('input[name="site"]').val();
 		let newLocation = row.find('select[name="location"]').val();
 		let newDesc = row.find('input[name="description"]').val();
 		let newIp = row.find('input[name="ipAddr"]').val();
 		let newKey = row.find('input[name="secretKey"]').val();
-                let newColor = row.find('select[name="color"]').val();
 
 		$.ajax({
 			type: 'POST',
 			url: baseUrl,
 
 			data: {
-				site: newSite,
 				location: newLocation,
 				description: newDesc,
 				ipAddress: newIp,
 				secretKey: newKey,
-				color: newColor,
 			},
 
 			beforeSend: function(e) {
-				console.log(e);
+				$('.preloader').show();
 			},
 			success: function(response) {
-				console.log(response);
+				$('.preloader').hide();
+				let alert = $('#formResultAlert');
+				alert.find('.text').html(response);
+				alert.show().addClass('active');
+				alert.find('[aria-label="Close"]').on('click', function(e) {
+					alert.removeClass('active');
+					setTimeout(function() {
+						alert.hide()
+					}, 300);
+				});
+				if (alert.hasClass('active')) {
+					setTimeout(function() {
+						alert.removeClass('active');
+						setTimeout(function() {
+							alert.hide()
+						}, 300);
+					}, 3000);
+				}
 			},
+			error: function(error) {
+				console.log(error);
+			}
 		});
 
 	});
