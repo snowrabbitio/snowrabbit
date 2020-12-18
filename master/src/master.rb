@@ -33,9 +33,9 @@ ADMIN_PASS = ENV['ADMIN_PASS']
 
 # Set up logger
 LOGGER = Logger.new(STDOUT)
-LOGGER.level = ENV['LOGGER_LEVEL'].nil? ? "info" : ENV['LOGGER_LEVEL']
-LOGGER.info("Logger Level: #{ENV['LOGGER_LEVEL']}")
-#LOGGER.level = ENV['LOGGER_LEVEL']
+LOGGER_LEVEL = ENV['LOGGER_LEVEL'].nil? ? "info" : ENV['LOGGER_LEVEL']
+LOGGER.level = LOGGER_LEVEL
+LOGGER.info("Logger Level: #{LOGGER_LEVEL}")
 
 # Set up database connection
 DB_TYPE = ENV['DB_TYPE']
@@ -53,6 +53,15 @@ if DB_TYPE == "sqlite"
   end
   DB_CONNECTION = Sequel.sqlite("#{DB_DATABASE_PATH}/#{DB_DATABASE}.db")
 elsif DB_TYPE == "mysql"
+  if LOGGER_LEVEL == "debug"
+    LOGGER.debug("Mysql DB Settings")
+    LOGGER.debug("-----------------")
+    LOGGER.debug("DB_USER: #{DB_USER}")
+    LOGGER.debug("DB_HOST: #{DB_HOST}")
+    LOGGER.debug("DB_PORT: #{DB_PORT}")
+    LOGGER.debug("DB_DATABASE: #{DB_DATABASE}")
+  end
+
   DB_CONNECTION = Sequel.mysql2(DB_DATABASE, user: DB_USER,  password: DB_PASS, host: DB_HOST, port: DB_PORT)
 else
   LOGGER.error("Could not determine DB_TYPE, exiting!")
@@ -107,7 +116,7 @@ end
 
 # URL Actions
 get '/' do
-  'Welcome to the Snowrabbit master node!'
+  redirect '/matrix'
 end
 
 post '/pang' do
@@ -244,6 +253,7 @@ end
 
 
 post '/admin/probe_update' do
+  protected!
   puts "PROBE: #{params}"
   'OK'
 end
@@ -278,7 +288,8 @@ get '/matrix' do
     @probe_last_seen = @probes_list.order(Sequel.desc(:last_seen)).first[:last_seen]
   end 
 
-  @ping_table = DB_CONNECTION[:ping_metrics]
+  # Get the number of probes * 5 and double it just to be safe, i don't think we'll need more than that
+  @ping_table = DB_CONNECTION[:ping_metrics].limit(@probes_list.count * 5 * 2).order(Sequel.desc(:timestamp))
 
   erb :matrix
 end
