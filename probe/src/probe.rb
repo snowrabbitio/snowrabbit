@@ -152,7 +152,7 @@ while true
         send_ping_metric(ping_out)
 
         LOGGER.info("Tracerouting #{site} - #{ip}")
-        traceroute_cmd = "traceroute #{ip}"
+        traceroute_cmd = "traceroute -n -w 1 #{ip}"
         traceroute = Mixlib::ShellOut.new(traceroute_cmd)
         traceroute.run_command
         send_traceroute_metric(site, ip, traceroute.stdout)
