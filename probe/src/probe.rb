@@ -9,9 +9,12 @@ require 'mixlib/shellout'
 require 'ostruct'
 require 'json'
 
+# Set up logger
 LOGGER = Logger.new(STDOUT)
-LOGGER.info("Logger Level: #{ENV['LOGGER_LEVEL']}")
-LOGGER.level = ENV['LOGGER_LEVEL']
+LOGGER_LEVEL = ENV['LOGGER_LEVEL'].nil? ? "info" : ENV['LOGGER_LEVEL']
+LOGGER.level = LOGGER_LEVEL
+LOGGER.info("Logger Level: #{LOGGER_LEVEL}")
+
 PROBE_SITE = ENV['PROBE_SITE']
 MASTER_HOST = ENV['MASTER_HOST']
 MASTER_PORT = ENV['MASTER_PORT']

@@ -82,6 +82,7 @@ unless DB_CONNECTION.table_exists?(:ping_metrics)
     column :min, String
     column :avg, String
     column :max, String
+    index [ :source_site, :dest_site, :timestamp ]
   end
 end
 
@@ -93,7 +94,7 @@ unless DB_CONNECTION.table_exists?(:traceroute_metrics)
     column :dest_site, String
     column :dest_ip, String
     column :traceroute, String, text: true
-
+    index [ :source_site, :dest_site, :timestamp ]
   end
 end
 
@@ -283,6 +284,7 @@ end
 
 get '/matrix' do
   # Get all of the latest ping times and display
+  @begin_time = Time.now
   @probes_list = DB_CONNECTION[:probes].where(active: 1).order(Sequel.desc(:location), Sequel.asc(:site))
   if @probes_list.count > 0
     @probe_last_seen = @probes_list.order(Sequel.desc(:last_seen)).first[:last_seen]
