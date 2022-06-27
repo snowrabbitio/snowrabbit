@@ -161,6 +161,25 @@ body > .jcf-select-drop.jcf-drop-flipped {
 	background: #ddd !important;
 }
 
+/* 
+*   Easing Equations ported to CSS by @matthewlein - http://matthewlein.com/ceaser/
+*   Converted to SCSS vars by @pettpett
+*   
+*   sample usage:
+*   a {
+*     color: #ff0000;
+*     transition: color 0.5s $easeOutQuint;
+*     &:hover,
+*     &:focus {
+*       color: #ff9900;
+*     }
+*   }
+*/
+
+/* Default Equations */
+
+/* Penner Equations (approximated) originally created by @robpenner */
+
 #wrapper {
 	overflow: hidden;
 	position: relative;
@@ -185,6 +204,29 @@ body > .jcf-select-drop.jcf-drop-flipped {
 .btn-primary:not(:disabled):not(.disabled).active:focus,
 .show > .btn-primary.dropdown-toggle:focus {
 	box-shadow: none;
+}
+
+.preloader {
+	position: fixed;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	-webkit-box-align: center;
+	-ms-flex-align: center;
+	align-items: center;
+	-webkit-box-pack: center;
+	-ms-flex-pack: center;
+	justify-content: center;
+	background: rgba(237, 244, 242, .9);
+	z-index: 99999;
+}
+
+.preloader svg {
+	display: block;
 }
 
 .close {
@@ -350,6 +392,79 @@ abbr[data-original-title] {
 .table.middle-aligned-cell th,
 .table.middle-aligned-cell td {
 	vertical-align: middle;
+}
+
+.alert {
+	position: fixed;
+	top: 0;
+	right: 30px;
+	-webkit-transform: translatey(-100%);
+	-ms-transform: translatey(-100%);
+	transform: translatey(-100%);
+	width: 300px;
+	margin-top: 0;
+	-webkit-transition: margin .15s cubic-bezier(.645, .045, .355, 1), -webkit-transform .15s cubic-bezier(.645, .045, .355, 1);
+	transition: margin .15s cubic-bezier(.645, .045, .355, 1), -webkit-transform .15s cubic-bezier(.645, .045, .355, 1);
+	transition: transform .15s cubic-bezier(.645, .045, .355, 1), margin .15s cubic-bezier(.645, .045, .355, 1);
+	transition: transform .15s cubic-bezier(.645, .045, .355, 1), margin .15s cubic-bezier(.645, .045, .355, 1), -webkit-transform .15s cubic-bezier(.645, .045, .355, 1);
+}
+
+.alert.active {
+	margin-top: 30px;
+	-webkit-transform: translatey(0);
+	-ms-transform: translatey(0);
+	transform: translatey(0);
+}
+
+.alert .alert-icon {
+	position: absolute;
+	top: -15px;
+	left: -15px;
+	width: 28px;
+	height: 28px;
+	background: #464d77;
+	font-size: 14px;
+	color: #fff;
+	border-radius: 100%;
+	display: -webkit-box;
+	display: -ms-flexbox;
+	display: flex;
+	-webkit-box-align: center;
+	-ms-flex-align: center;
+	align-items: center;
+	-webkit-box-pack: center;
+	-ms-flex-pack: center;
+	justify-content: center;
+}
+
+.alert .close {
+	width: 15px;
+	height: 15px;
+	opacity: 1;
+	position: absolute;
+	top: 4px;
+	right: 4px;
+}
+
+.alert .close:before,
+.alert .close:after {
+	content: "";
+	width: 2px;
+	background: #464d77;
+	position: absolute;
+	top: 0;
+	right: 50%;
+	bottom: 0;
+	-webkit-transform: rotate(45deg);
+	-ms-transform: rotate(45deg);
+	transform: rotate(45deg);
+	border-radius: 5px;
+}
+
+.alert .close:after {
+	-webkit-transform: rotate(-45deg);
+	-ms-transform: rotate(-45deg);
+	transform: rotate(-45deg);
 }
 
 #header {
@@ -580,7 +695,7 @@ abbr[data-original-title] {
 }
 
 .form-control:focus {
-	border-bottom-color: #464d77;
+	border-color: #464d77;
 }
 
 .desc-field {

@@ -1,7 +1,6 @@
-DB_TYPE = "mysql"
-DB_USER = "snowrabbit"
-DB_PASS = "abc123"
-DB_HOST = "mysql.snowrabbit.io"
-DB_PORT = "3306"
+DB_TYPE = "sqlite"
 DB_DATABASE = "snowrabbit"
+DB_DATABASE_PATH = "/var/lib/db"
 LOGGER_LEVEL = "info"
+ADMIN_USER=admin
+ADMIN_PASS=abc123

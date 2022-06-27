@@ -5515,7 +5515,7 @@ a.badge-spanish-gray.focus {
 	position: relative;
 	padding: .75rem 1.25rem;
 	margin-bottom: 1rem;
-	border: 1px solid transparent;
+	border: 2px solid transparent;
 	border-radius: .25rem;
 }
 
@@ -5539,123 +5539,123 @@ a.badge-spanish-gray.focus {
 }
 
 .alert-primary {
-	color: #24283e;
-	background-color: #dadbe4;
-	border-color: #cbcdd9;
+	color: #464d77;
+	background-color: #f8f8fa;
+	border-color: #464d77;
 }
 .alert-primary hr {
-	border-top-color: #bcbfce;
+	border-top-color: #3d4367;
 }
 .alert-primary .alert-link {
-	color: #11131e;
+	color: #333857;
 }
 
 .alert-secondary {
-	color: #464a4e;
-	background-color: #e7e8ea;
-	border-color: #dddfe2;
+	color: #868e96;
+	background-color: #fafafb;
+	border-color: #868e96;
 }
 .alert-secondary hr {
-	border-top-color: #cfd2d6;
+	border-top-color: #78818a;
 }
 .alert-secondary .alert-link {
-	color: #2e3133;
+	color: #6c757d;
 }
 
 .alert-success {
-	color: #315a2d;
-	background-color: #dfefdd;
-	border-color: #d2e8d0;
+	color: #5fad56;
+	background-color: #f9fcf8;
+	border-color: #5fad56;
 }
 .alert-success hr {
-	border-top-color: #c2e0bf;
+	border-top-color: #559d4c;
 }
 .alert-success .alert-link {
-	color: #1e381c;
+	color: #4b8c44;
 }
 
 .alert-info {
-	color: #0c5460;
-	background-color: #d1ecf1;
-	border-color: #bee5eb;
+	color: #17a2b8;
+	background-color: #f6fbfc;
+	border-color: #17a2b8;
 }
 .alert-info hr {
-	border-top-color: #abdde5;
+	border-top-color: #148ea1;
 }
 .alert-info .alert-link {
-	color: #062c33;
+	color: #117a8b;
 }
 
 .alert-warning {
-	color: #7e6921;
-	background-color: #fdf4d9;
-	border-color: #fcf0ca;
+	color: #f3ca40;
+	background-color: #fffdf7;
+	border-color: #f3ca40;
 }
 .alert-warning hr {
-	border-top-color: #fbe9b2;
+	border-top-color: #f1c328;
 }
 .alert-warning .alert-link {
-	color: #564716;
+	color: #f0bd10;
 }
 
 .alert-danger {
-	color: #630302;
-	background-color: #f2cdcd;
-	border-color: #edb9b8;
+	color: #bf0603;
+	background-color: #fcf5f5;
+	border-color: #bf0603;
 }
 .alert-danger hr {
-	border-top-color: #e8a5a4;
+	border-top-color: #a60503;
 }
 .alert-danger .alert-link {
-	color: #310101;
+	color: #8d0402;
 }
 
 .alert-light {
-	color: #7b7f7e;
-	background-color: #fbfdfc;
-	border-color: #fafcfb;
+	color: #edf4f2;
+	background-color: #fefffe;
+	border-color: #edf4f2;
 }
 .alert-light hr {
-	border-top-color: #eaf2ee;
+	border-top-color: #ddeae7;
 }
 .alert-light .alert-link {
-	color: #626564;
+	color: #cde1db;
 }
 
 .alert-dark {
-	color: #1e2022;
-	background-color: #d7d8d9;
-	border-color: #c8c9ca;
+	color: #393e41;
+	background-color: #f7f7f7;
+	border-color: #393e41;
 }
 .alert-dark hr {
-	border-top-color: #bbbcbd;
+	border-top-color: #2d3133;
 }
 .alert-dark .alert-link {
-	color: #060707;
+	color: #212426;
 }
 
 .alert-gray {
-	color: #464a4e;
-	background-color: #e7e8ea;
-	border-color: #dddfe2;
+	color: #868e96;
+	background-color: #fafafb;
+	border-color: #868e96;
 }
 .alert-gray hr {
-	border-top-color: #cfd2d6;
+	border-top-color: #78818a;
 }
 .alert-gray .alert-link {
-	color: #2e3133;
+	color: #6c757d;
 }
 
 .alert-spanish-gray {
-	color: #554d4d;
-	background-color: #edeaea;
-	border-color: #e5e1e1;
+	color: #a39594;
+	background-color: #fbfbfb;
+	border-color: #a39594;
 }
 .alert-spanish-gray hr {
-	border-top-color: #d9d3d3;
+	border-top-color: #978786;
 }
 .alert-spanish-gray .alert-link {
-	color: #3a3535;
+	color: #8b7a79;
 }
 
 @-webkit-keyframes progress-bar-stripes {
