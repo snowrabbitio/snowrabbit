@@ -15,4 +15,4 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build . --file Dockerfile -t snowrabbitio/master
+      run: docker build . --file master/Dockerfile -t snowrabbitio/master
