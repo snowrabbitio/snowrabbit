@@ -298,6 +298,7 @@ end
 
 
 get '/site_details' do
+  @begin_time = Time.now
   @source_site = params[:source_site]
   @dest_site = params[:dest_site]
   @ping_metrics = DB_CONNECTION[:ping_metrics].where(source_site: @source_site, dest_site: @dest_site).limit(5).order(Sequel.desc(:timestamp))
