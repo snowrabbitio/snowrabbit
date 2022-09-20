@@ -9,6 +9,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    # Get the current time
+    - name: Get current time
+      uses: josStorer/get-current-time@v2.0.1
+      id: current-time
+      with:
+        format: YYYYMMDD-HH
+
     # Login to docker hub
     -
       name: Login to DockerHub
