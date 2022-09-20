@@ -30,4 +30,12 @@ jobs:
         tags: |
           snowrabbitio/master:latest
 
+    # Build and push probe
+    - name: Build and push to Docker Hub for probe
+      uses: docker/build-push-action@v3
+      with:
+        context: ./probe
+        push: true
+        tags: |
+          snowrabbitio/probe:latest
 
