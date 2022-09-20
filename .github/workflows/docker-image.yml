@@ -21,29 +21,12 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-#      uses: actions/checkout@v3
-#    - name: Build the Docker image for master
-#      run: cd master; docker build . --file Dockerfile -t snowrabbitio/master;cd ..
+    # Build and push master
+    - name: Build and push to Docker Hub for master
+      uses: docker/build-push-action@v3
+      with:
+        context: ./master
+        tags: |
+          snowrabbitio/master:latest
 
-#    - uses: actions/checkout@v3
-#    - name: Build the Docker image for probe
-#      run: cd probe; docker build . --file Dockerfile -t snowrabbitio/probe
-
-     # Build and push master
-     - name: Build and push to Docker Hub for master
-       uses: docker/build-push-action@v3
-       with:
-         context: ./master
-         tags: |
-           snowrabbitio/master:latest
-
-
-
-#    -
-#      name: Build and push
-#      uses: docker/build-push-action@v3
-#      with:
-#        push: true
-#        tags: snowrabbit/master:latest
-#
 
