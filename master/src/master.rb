@@ -313,3 +313,7 @@ get '/site_details' do
   erb :site_details
 end
 
+get '/healthcheck' do
+  'OK'
+end
+
