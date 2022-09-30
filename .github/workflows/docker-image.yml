@@ -48,3 +48,13 @@ jobs:
           snowrabbitio/probe:latest
           snowrabbitio/probe:${{ steps.current-time.outputs.formattedTime }}
 
+    # Build and push webui
+    - name: Build and push to Docker Hub for webui
+      uses: docker/build-push-action@v3
+      with:
+        context: ./webui
+        push: true
+        tags: |
+          snowrabbitio/webui:latest
+          snowrabbitio/webui:${{ steps.current-time.outputs.formattedTime }}
+
