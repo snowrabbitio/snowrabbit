@@ -22,4 +22,4 @@ RUN gem install mysql2
 RUN gem install sequel
 
 WORKDIR /app
-CMD /app/master.rb
+CMD /app/webui.rb

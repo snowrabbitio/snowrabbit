@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DOCKER_ID=snowrabbitio
-APP=gui
+APP=webui
 PROBE_SECRET=abc123
 
 case $1 in
@@ -13,7 +13,7 @@ case $1 in
   start|run)
     echo "RUN"
     #### Removed --rm
-    docker run --name $DOCKER_ID-$APP -d -ePROBE_SECRET=$PROBE_SECRET -p 8090:4567 -v ~/git/snowrabbit/master/db:/var/lib/db $DOCKER_ID/$APP
+    docker run --name $DOCKER_ID-$APP -d -ePROBE_SECRET=$PROBE_SECRET -p 4567:4567 -v ~/git/snowrabbit/master/db:/var/lib/db $DOCKER_ID/$APP
     ;;
 
   stop)
