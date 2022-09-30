@@ -1,0 +1,50 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Get the current time
+    - name: Get current time
+      uses: josStorer/get-current-time@v2.0.1
+      id: current-time
+      with:
+        format: YYYYMMDDHHMMSS
+
+    # Login to docker hub
+    -
+      name: Login to DockerHub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    # Checkout code
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Build and push master
+    - name: Build and push to Docker Hub for master
+      uses: docker/build-push-action@v3
+      with:
+        context: ./master
+        push: true
+        tags: |
+          snowrabbitio/master:latest
+          snowrabbitio/master:${{ steps.current-time.outputs.formattedTime }}
+
+    # Build and push probe
+    - name: Build and push to Docker Hub for probe
+      uses: docker/build-push-action@v3
+      with:
+        context: ./probe
+        push: true
+        tags: |
+          snowrabbitio/probe:latest
+          snowrabbitio/probe:${{ steps.current-time.outputs.formattedTime }}
+

@@ -281,6 +281,7 @@ post '/register_probe' do
   'Probe registered'
 end
 
+
 get '/healthcheck' do
   'OK'
 end
