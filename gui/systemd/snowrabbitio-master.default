@@ -1,0 +1,6 @@
+DB_TYPE = "sqlite"
+DB_DATABASE = "snowrabbit"
+DB_DATABASE_PATH = "/var/lib/db"
+LOGGER_LEVEL = "info"
+ADMIN_USER=admin
+ADMIN_PASS=abc123
