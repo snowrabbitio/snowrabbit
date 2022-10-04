@@ -13,24 +13,6 @@ require 'json'
 set :bind, '0.0.0.0'
 set :port, 4567
 
-# Add auth for admin
-helpers do
-  def protected!
-    return if authorized?
-    headers['WWW-Authenticate'] = 'Basic realm="Restricted Area"'
-    halt 401, "Not authorized\n"
-  end
-
-  def authorized?
-    @auth ||=  Rack::Auth::Basic::Request.new(request.env)
-    @auth.provided? and @auth.basic? and @auth.credentials and @auth.credentials == [ADMIN_USER, ADMIN_PASS]
-  end
-end
-
-# Admin userpass
-ADMIN_USER = ENV['ADMIN_USER']
-ADMIN_PASS = ENV['ADMIN_PASS']
-
 # Set up logger
 LOGGER = Logger.new(STDOUT)
 LOGGER_LEVEL = ENV['LOGGER_LEVEL'].nil? ? "info" : ENV['LOGGER_LEVEL']
@@ -225,38 +207,6 @@ post '/send_metric' do
     end
 
   end
-end
-
-
-get '/admin' do
-  protected!
-  erb :admin
-end
-
-
-get '/admin/metric_list' do
-  protected!
-  @ping_metrics = DB_CONNECTION[:ping_metrics].limit(50).order(Sequel.desc(:timestamp)) 
-  erb :admin_metric_list
-end
-
-
-get '/admin/probe_list' do
-  protected!
-  @probes = DB_CONNECTION[:probes].where(active: 1)
-  @probes_unregistered = DB_CONNECTION[:probes].where(active: 2)
-  @probes_inactive = DB_CONNECTION[:probes].where(active: 0)
-  @colors = ['maroon', 'purple', 'gunmetal', 'lavender', 'spanish-gray']
-  @locations = ['US', 'EU', 'APAC']
-
-  erb :admin_probe_list
-end
-
-
-post '/admin/probe_update' do
-  protected!
-  puts "PROBE: #{params}"
-  'OK'
 end
 
 
