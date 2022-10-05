@@ -21,7 +21,7 @@ MASTER_PORT = ENV['MASTER_PORT']
 PROBE_SECRET = ENV['PROBE_SECRET']
 
 def send_pang
-  uri = URI("http://#{MASTER_HOST}:#{MASTER_PORT}/pang")
+  uri = URI("#{MASTER_HOST}:#{MASTER_PORT}/pang")
   begin
     res = Net::HTTP.post_form(uri, 'name' => 'pang',
                                    'site' => PROBE_SITE,
@@ -39,7 +39,7 @@ def send_pang
 end
 
 def get_probe_sites
-  uri = URI("http://#{MASTER_HOST}:#{MASTER_PORT}/get_probes")
+  uri = URI("#{MASTER_HOST}:#{MASTER_PORT}/get_probes")
   probe_sites = {}
 
   begin
@@ -58,7 +58,7 @@ end
 def send_ping_metric(ping_vals)
   LOGGER.debug("Sending ping metric")
   LOGGER.debug("METRIC: #{ping_vals}")
-  uri = URI("http://#{MASTER_HOST}:#{MASTER_PORT}/send_metric")
+  uri = URI("#{MASTER_HOST}:#{MASTER_PORT}/send_metric")
 
   begin
     res = Net::HTTP.post_form(uri, 'name' => 'ping',
@@ -82,7 +82,7 @@ end
 
 def send_traceroute_metric(site, ip, traceroute_out)
   LOGGER.info("Sending traceroute metric")
-  uri = URI("http://#{MASTER_HOST}:#{MASTER_PORT}/send_metric")
+  uri = URI("#{MASTER_HOST}:#{MASTER_PORT}/send_metric")
   LOGGER.debug("URL: #{uri}")
 
   begin
