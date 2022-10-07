@@ -122,6 +122,13 @@ post '/pang' do
   end
 
   if pang_authed
+    # See if we need to update the IP address, sometimes it can be different
+    probe_ip = DB_CONNECTION[:probes].where(site: params[:site])
+    if probe_ip.first[:ip] != request.ip
+       LOGGER.info("Updating IP for site #{params[:site]} to #{request.ip}")
+       DB_CONNECTION[:probes].where(site: params[:site]).update(ip: request.ip)
+    end
+
     'OK'
   else
     status 401
