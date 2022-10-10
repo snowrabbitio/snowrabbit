@@ -2,12 +2,17 @@
 
 # This script runs once every few mins and pings all probe nodes
 $stdout.sync = true
+require 'sinatra'
 require 'net/ping'
 require 'net/http'
 require 'logger'
 require 'mixlib/shellout'
 require 'ostruct'
 require 'json'
+
+# Set sinatra config
+set :bind, '0.0.0.0'
+set :port, 4567
 
 # Set up logger
 LOGGER = Logger.new(STDOUT)
@@ -19,6 +24,16 @@ PROBE_SITE = ENV['PROBE_SITE']
 MASTER_HOST = ENV['MASTER_HOST']
 MASTER_PORT = ENV['MASTER_PORT']
 PROBE_SECRET = ENV['PROBE_SECRET']
+
+# URL Actions
+get '/' do
+  'Snowrabbit'
+end
+
+# URL Actions
+get '/healthcheck' do
+  'OK'
+end
 
 def send_pang
   uri = URI("#{MASTER_HOST}:#{MASTER_PORT}/pang")
@@ -108,64 +123,62 @@ end
 
 
 
-while true
-  # Send pang to master server along with secret
-  LOGGER.info("Sending pang")
-  if !send_pang
-    LOGGER.info('Error, cannot reach master or secret failed!')
-  else
-    # We got a pung back, let's get all sites
+Thread.new {
+  while true
+    # Send pang to master server along with secret
+    LOGGER.info("Sending pang")
+    if !send_pang
+      LOGGER.info('Error, cannot reach master or secret failed!')
+    else
+      # We got a pung back, let's get all sites
 
-    # Parse returned json from master
-    probe_sites = get_probe_sites()
+      # Parse returned json from master
+      probe_sites = get_probe_sites()
 
-    # Let's loop through the sites and ping ips
-    probe_sites.each do |site, ip|
-      unless site == PROBE_SITE
-        LOGGER.info("Pinging #{site} - #{ip}")
+      # Let's loop through the sites and ping ips
+      probe_sites.each do |site, ip|
+        unless site == PROBE_SITE
+          LOGGER.info("Pinging #{site} - #{ip}")
 
-        ping_cmd = "ping -c 5 -i 1 #{ip}"
-        ping = Mixlib::ShellOut.new(ping_cmd)
-        ping.run_command
+          ping_cmd = "ping -c 5 -i 1 #{ip}"
+          ping = Mixlib::ShellOut.new(ping_cmd)
+          ping.run_command
 
-        # Parse out the output
-        ping_out = OpenStruct.new
-        ping_out.site = site
-        ping_out.ip = ip
+          # Parse out the output
+          ping_out = OpenStruct.new
+          ping_out.site = site
+          ping_out.ip = ip
 
-        ping.stdout.each_line do |line|
-          line.chomp!
-          if line.include?("packet loss")
-            /^(\d+) packets transmitted, (\d+) packets received, ([0-9\.\-\/]+)\% packet loss/.match(line)
-            ping_out.transmitted = $1
-            ping_out.received = $2
-            ping_out.packet_loss = $3
-          elsif line.start_with?("round-trip")
-            /^round-trip min\/avg\/max \= ([0-9\.\-\/]+)\/([0-9\.\-\/]+)\/([0-9\.\-\/]+) ms$/.match(line)
-            ping_out.min = $1
-            ping_out.avg = $2
-            ping_out.max = $3
-            ping_out.mdev = $4
+          ping.stdout.each_line do |line|
+            line.chomp!
+            if line.include?("packet loss")
+              /^(\d+) packets transmitted, (\d+) packets received, ([0-9\.\-\/]+)\% packet loss/.match(line)
+              ping_out.transmitted = $1
+              ping_out.received = $2
+              ping_out.packet_loss = $3
+            elsif line.start_with?("round-trip")
+              /^round-trip min\/avg\/max \= ([0-9\.\-\/]+)\/([0-9\.\-\/]+)\/([0-9\.\-\/]+) ms$/.match(line)
+              ping_out.min = $1
+              ping_out.avg = $2
+              ping_out.max = $3
+              ping_out.mdev = $4
+            end
           end
-        end
 
-#2 packets transmitted, 2 packets received, 0% packet loss
-#round-trip min/avg/max = 0.639/1.122/1.606 ms
+          send_ping_metric(ping_out)
 
-        send_ping_metric(ping_out)
-
-        LOGGER.info("Tracerouting #{site} - #{ip}")
-        traceroute_cmd = "traceroute -n -w 1 #{ip}"
-        traceroute = Mixlib::ShellOut.new(traceroute_cmd)
-        traceroute.run_command
-        send_traceroute_metric(site, ip, traceroute.stdout)
-        LOGGER.debug("OUT: #{traceroute.stdout}")
+          LOGGER.info("Tracerouting #{site} - #{ip}")
+          traceroute_cmd = "traceroute -n -w 1 #{ip}"
+          traceroute = Mixlib::ShellOut.new(traceroute_cmd)
+          traceroute.run_command
+          send_traceroute_metric(site, ip, traceroute.stdout)
+          LOGGER.debug("OUT: #{traceroute.stdout}")
  
 
+        end
       end
     end
+    # Sleep for a bit before checking again
+    sleep(60)
   end
-  # Sleep for a bit before checking again
-  sleep(60)
-end
-
+}
