@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<title>Snowrabbit</title>
+	<link rel="stylesheet" href="/css/bootstrap.css">
+	<link rel="stylesheet" href="/css/main.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+        <script src="/js/jquery.timeago.js"></script>
+	<script src="/js/jquery.main.js"></script>
+</head>
+<body class="not-login">
+
+        <div id="wrapper">
+		<div id="header" class="py-2">
+			<div class="container">
+				<div class="logo"><a href="#"><img class="img-fluid" src="/images/logo.png" alt="Snowrabbit"></a></div>
+			</div>
+		</div>
+                <main id="main">
+                        <div class="container">
+                                <div class="latency-holder">
+					<div class="position-relative px-4">
+						<h3 class="h6 mb-0 text-center table-label-y"><span>Dest Sites</span></h3>
+                                        <table>
+                                                <thead>
+							<thead>
+								<tr>
+									<th class="corner">&nbsp;</th>
+									<th class="corner" colspan=5>
+										<h3 class="h6 text-center table-label-x">Source Sites</h3>
+									</th>
+								</tr>
+
+                                                        <tr>
+                                                                <th class="corner">&nbsp;</th>
+<%
+  @probes_list.each do |probe|
+%>
+<th class="heading-<%= probe[:color] %>"><%= probe[:site] %></th>
+<% end %>
+                                                        </tr>
+                                                </thead>
+<tbody>
+<%
+  @probes_list.each do |probe|
+%>
+<tr>
+<th class="heading-<%= probe[:color] %>"><%= probe[:site] %></th>
+
+<% @probes_list.each do |p| %>
+<%   if probe[:site] == p[:site] %>
+<td class="empty-box">&nbsp;</td>
+<%
+    else
+      ping_metric = @ping_table.where(source_site: p[:site], dest_site: probe[:site]).order(Sequel.desc(:timestamp)).limit(1)
+      if ping_metric.first
+        # Set cell color if needed
+        if ((Time.now.to_i - ping_metric.first[:timestamp]) > 300)
+          ping_status = "gray"
+        end
+%>
+<td class="popup-trigger <%= ping_status %>" data-toggle="modal" data-target="#resultDataModal" data-content="/site_details?source_site=<%=p[:site] %>&dest_site=<%= probe[:site] %>"><span class="d-block" data-toggle="tooltip" data-placement="top" data-html="true" title="<span class='small d-block'>Click to open popup</span>"><%= ping_metric.first[:avg] %></span></td>
+<%
+      end
+    end
+  end
+%>
+</tr>
+
+<%
+  end
+%>
+
+                                                </tbody>
+                                        </table>
+				</div>
+					<div class="px-4">
+						<div class="text-right py-1">
+							<span class="update-status small text-gray">Last Updated: <time class="font-weight-bold text-dark"><%= Time.at(@probe_last_seen).strftime('%Y-%m-%d %H:%M:%S') %> (<abbr title="<%= Time.at(@probe_last_seen).iso8601 %>" class="timeago"></abbr>)</time></span>
+						</div>
+						<div class="pt-2">
+							<div class="row align-items-center justify-content-end">
+								<div class="col-2 text-right pr-0">
+									<span class="small">Refresh page every:</span>
+								</div>
+								<div class="col-2">
+									<select id="refreshSelect" class="custom-select custom-select-sm">
+										<option value="1">1 min</option>
+										<option value="2">2 mins</option>
+										<option value="3">3 mins</option>
+										<option value="4">4 mins</option>
+										<option value="5">5 mins</option>
+									</select>
+								</div>
+							</div>
+						</div>
+					</div>
+
+                                        <div class="px-4">
+                                                <div class="text-right py-1 small">Page Loaded in <%= sprintf("%0.2f", Time.now - @begin_time) %> seconds.</div>
+                                        </div>
+
+                        </div>
+</div>
+                </main>
+
+		<!-- Modal -->
+		<div class="modal fade" id="resultDataModal" tabindex="-1" role="dialog" aria-labelledby="resultDataModalLabel" aria-hidden="true">
+			<div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+				<div class="modal-content">
+					<div class="modal-body">
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+						<div class="content"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+        </div>
+</body>
+</html>
+

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<title>SnowRabbit</title>
+	<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="/css/bootstrap.css">
+	<link rel="stylesheet" href="/css/fontawesome.css">
+	<link rel="stylesheet" href="/css/main.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js" defer></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" crossorigin="anonymous" defer></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous" defer></script>
+	<script src="/js/jquery.timeago.js" defer></script>
+	<script src="/js/jquery.main.js" defer></script>
+</head>
+<body class="not-login">
+	<div id="wrapper">
+		<div id="header" class="py-2 mb-4">
+			<div class="container">
+				<div class="logo"><a href="#"><img class="img-fluid" src="/images/logo.png" alt="Snowrabbit"></a></div>
+			</div>
+		</div>
+		<main id="main">
+			<div class="container">
+				<section class="py-3">
+					<h3 class="h6 font-weight-bold text-center mb-3">Probes</h3>
+					<table class="table middle-aligned-cell table-sm small mb-0">
+						<thead>
+							<tr>
+								<th class="bg-light border-light">Site</th>
+								<th class="text-center bg-light border-light">Location</th>
+								<th class="text-center bg-light border-light">Description</th>
+								<th class="text-center bg-light border-light">IP</th>
+								<th class="text-center bg-light border-light">Secret</th>
+								<th class="text-center bg-light border-light">Last Seen</th>
+								<th class="text-center bg-light border-light">UI Color</th>
+								<th class="text-center bg-light border-light">Active</th>
+								<th class="bg-light border-light">&nbsp;</th>
+							</tr>
+						</thead>
+						<tbody>
+
+<% @probes.each do |p| %>
+							<tr>
+								<td><%= p[:site] %><input type='hidden' name='site' value='<%= p[:site] %>'></td>
+								<td class="text-center">
+										<select name="location" class="custom-select custom-select-sm">
+<% @locations.each do |location|
+    if location == p[:location]
+%>
+                                                                                        <option value="<%= location %>" selected><%= location %></option>
+<% else %>
+                                                                                        <option value="<%= location %>"><%= location %></option>
+<% end
+  end
+%>
+                                                                                </select>
+
+</td>
+								<td class="text-center"><div class="form-group desc-field mb-0 ml-auto"><input name="description" type="text" class="form-control form-control-sm" placeholder="Enter the description" value="<%= p[:description] %>"></div></td>
+								<td class="text-center"><div class="form-group ip-field mb-0 ml-auto"><input name="ipAddr" type="text" class="form-control form-control-sm" placeholder="Enter the IP" value="<%= p[:ip] %>"></div></td>
+								<td class="text-center"><div class="form-group key-field mb-0 ml-auto"><input name="secretKey" type="text" class="form-control form-control-sm" placeholder="Enter the key" value="<%= p[:secret] %>"></div></td>
+								<td class="text-right">
+<% if p[:last_seen] %>
+<%=   Time.now.to_i - p[:last_seen] %> sec ago
+<% else %>
+Not seen
+<% end %>
+</td>
+								<td class="text-center">
+									<div class="custom-form">
+										<select name="color" class="color-select">
+<%  @colors.each do |color|
+      if p[:color] == color
+ %>
+										<option value="<%= color %>" class="select-<%= color %>" selected><span class="sr-only"><%= color %></span></option>
+<% else %>
+										<option value="<%= color %>" class="select-<%= color %>"><span class="sr-only"><%= color %></span></option>
+<%    end
+    end
+%>
+										</select>
+									</div>
+								</td>
+								<td class="text-center">
+<% if p[:active] %>
+<span class="active-inactive-icon"><img src="/images/icon-active.png" alt="image description"></span>
+<% else %>
+<span class="active-inactive-icon"><img src="/images/icon-inactive.png" alt="image description"></span>
+<% end %>
+</td>
+								<td class="text-center">
+									<button class="btn btn-update btn-primary">Update</button>
+								</td>
+							</tr>
+
+
+
+
+<% end %>
+						</tbody>
+					</table>
+				</section>
+
+
+				<section class="py-3">
+					<h3 class="h6 font-weight-bold text-center mb-3">Unregistered Probes</h3>
+                                        <table class="table table-sm small mb-0">
+                                                <thead>
+                                                        <tr>
+                                                                <th class="bg-light border-light">Site</th>
+                                                                <th class="text-right bg-light border-light">IP</th>
+                                                                <th class="text-right bg-light border-light">Secret</th>
+                                                                <th class="text-right bg-light border-light">Active</th>
+                                                        </tr>
+                                                </thead>
+                                                <tbody>
+
+<% @probes_unregistered.each do |p| %>
+<FORM ACTION="/register_probe" METHOD="POST">
+<INPUT TYPE="hidden" NAME="site" VALUE="<%= p[:site] %>">
+<TR>
+<TD ALIGN=right><%= p[:site] %></TD>
+<TD ALIGN=right><%= p[:ip] %></TD>
+<TD ALIGN=right><INPUT NAME="secret" VALUE="<%= [*('a'..'z'),*('0'..'9')].shuffle[0,32].join %>" SIZE=50></TD>
+<TD ALIGN=right><INPUT TYPE="submit" VALUE="Register"></TD>
+</TR>
+</FORM>
+<% end %>
+						</tbody>
+					</table>
+				</section>
+
+				<section class="py-3">
+					<h3 class="h6 font-weight-bold text-center mb-3">Inactive Probes</h3>
+					<table class="table table-sm small mb-0">
+						<thead>
+							<tr>
+								<th class="bg-light border-light">Site</th>
+								<th class="text-right bg-light border-light">IP</th>
+								<th class="text-right bg-light border-light">Last Seen</th>
+							</tr>
+						</thead>
+						<tbody>
+
+<% @probes_inactive.each do |p| %>
+<TR>
+<TD ALIGN=right><%= p[:site] %></TD>
+<TD ALIGN=right><%= p[:ip] %></TD>
+<TD ALIGN=right>
+<% if p[:last_seen] %>
+<%=   Time.now.to_i - p[:last_seen] %> sec ago
+<% else %>
+Not seen
+<% end %>
+</TD>
+</TR>
+<% end %>
+						</tbody>
+					</table>
+				</section>
+			</div>
+		</main>
+
+		<!-- form result alert -->
+		<div id="formResultAlert" class="alert alert-primary text-center" role="alert">
+			<span class="alert-icon"><i class="fas fa-check"></i></span>
+			<button type="button" class="close" aria-label="Close">
+				<span class="sr-only">close</span>
+			</button>
+			<div class="text"></div>
+		</div>
+		<div class="preloader" style="display: none;">
+			<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="margin: auto; background: none; display: block; shape-rendering: auto;" width="200px" height="200px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
+			<circle cx="50" cy="50" fill="none" stroke="#464d77" stroke-width="10" r="35" stroke-dasharray="164.93361431346415 56.97787143782138" transform="rotate(335.821 50.0001 50)">
+			  <animateTransform attributeName="transform" type="rotate" repeatCount="indefinite" dur="1s" values="0 50 50;360 50 50" keyTimes="0;1"></animateTransform>
+			</circle>
+			<!-- [ldio] generated by https://loading.io/ --></svg>
+		</div>
+	</div>
+</body>
+</html>
+
+

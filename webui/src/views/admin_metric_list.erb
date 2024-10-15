@@ -1,0 +1,40 @@
+<CENTER>
+<h2>Last 50 pings</h2>
+<TABLE BORDER=1 WIDTH=80%>
+<TR>
+<TH COLSPAN=3>&nbsp;</TH>
+<TH COLSPAN=7>Ping</TH>
+</TR>
+
+<TR>
+<TH>Timestamp</TH>
+<TH>Source Site</TH>
+<TH>Destination Site</TH>
+<TH>Transmitted</TH>
+<TH>Received</TH>
+<TH>Packet Loss</TH>
+<TH>Min</TH>
+<TH>Average</TH>
+<TH>Max</TH>
+<TH>Dev</TH>
+</TR>
+
+
+
+<% @ping_metrics.each do |p| %>
+<TR>
+<TD><%= Time.at(p[:timestamp]).strftime('%Y-%m-%d %H:%M:%S') %></TD>
+<TD ALIGN=right><%= p[:source_site] %></TD>
+<TD ALIGN=right><%= p[:dest_site] %></TD>
+<TD ALIGN=right><%= p[:transmitted] %></TD>
+<TD ALIGN=right><%= p[:received] %></TD>
+<TD ALIGN=right><%= p[:packet_loss] %></TD>
+<TD ALIGN=right><%= p[:min] %></TD>
+<TD ALIGN=right><%= p[:avg] %></TD>
+<TD ALIGN=right><%= p[:max] %></TD>
+<TD ALIGN=right><%= p[:mdev] %></TD>
+</TR>
+<% end %>
+
+</TABLE>
+</CENTER>

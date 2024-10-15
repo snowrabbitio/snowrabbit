@@ -1,0 +1,54 @@
+<section class="pb-3">
+	<h3 class="h4 font-weight-bold text-center"><%= @source_site %> -> <%= @dest_site %></h3>
+	<h4 class="h6 font-weight-bold text-center">Last 5 ping values</h4>
+	<div class="py-2">
+		<table class="table table-sm small mb-0">
+			<thead>
+				<tr>
+					<th class="bg-light border-light">Time</th>
+					<th class="text-right bg-light border-light">Transmitted</th>
+					<th class="text-right bg-light border-light">Received</th>
+					<th class="text-right bg-light border-light">Packet Loss</th>
+					<th class="text-right bg-light border-light">Min</th>
+					<th class="text-right bg-light border-light">Average</th>
+					<th class="text-right bg-light border-light">Max</th>
+				</tr>
+			</thead>
+			<tbody>
+<%
+
+  last_updated_display = Time.at(@traceroute_out[:timestamp]).to_datetime.strftime('%Y-%m-%d %H:%M:%S')
+  last_updated_iso = Time.at(@traceroute_out[:timestamp]).iso8601
+
+ @ping_metrics.each do |p|
+  time_display = Time.at(p[:timestamp]).to_datetime.strftime('%Y-%m-%d %H:%M:%S')
+%>
+				<tr>
+					<td><%= time_display %></td>
+					<td class="text-right"><%= p[:transmitted] %></td>
+					<td class="text-right"><%= p[:received] %></td>
+					<td class="text-right"><%= p[:packet_loss] %></td>
+					<td class="text-right"><%= p[:min] %></td>
+					<td class="text-right"><%= p[:avg] %></td>
+					<td class="text-right"><%= p[:max] %></td>
+				</tr>
+<% end %>
+			</tbody>
+		</table>
+	</div>
+</section>
+<section class="pb-3">
+	<h3 class="h5 font-weight-bold text-center mb-3">Latest Traceroute</h3>
+	<div class="mb-3">
+		<span class="update-status small text-gray">Last Updated: <time class="font-weight-bold text-dark" datetime="<%= last_updated_display%>"><%= last_updated_display %> (<abbr title="<%= last_updated_iso%>" class="timeago"></abbr>)</time></span>
+	</div>
+	<pre class="font-xs mb-0">
+          <%= @traceroute_out[:traceroute] %>
+	</pre>
+
+	<div class="px-4">
+		<div class="text-right py-1 small">Page Loaded in <%= sprintf("%0.2f", Time.now - @begin_time) %> seconds.</div>
+	</div>
+
+</section>
+
