@@ -2,10 +2,6 @@
 
 DOCKER_ID=snowrabbitio
 APP=probe
-MASTER_HOST="http://192.168.1.200"
-MASTER_PORT=8090
-PROBE_SECRET=abc123
-PROBE_SITE=ewr
 
 case $1 in
   build)
@@ -16,7 +12,7 @@ case $1 in
   start|run)
     echo "RUN"
     #### REMOVED --rm
-    docker run --name $APP -d -eMASTER_HOST=$MASTER_HOST -eMASTER_PORT=$MASTER_PORT -ePROBE_SITE=$PROBE_SITE -ePROBE_SECRET=$PROBE_SECRET -p 8091:4567 $DOCKER_ID/$APP
+    docker run --name $APP -d -eMASTER_HOST=$MASTER_HOST -eMASTER_PORT=$MASTER_PORT -ePROBE_SITE=$PROBE_SITE -ePROBE_SECRET=$PROBE_SECRET $DOCKER_ID/$APP
     ;;
 
   stop)

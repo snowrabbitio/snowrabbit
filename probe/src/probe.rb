@@ -24,6 +24,7 @@ PROBE_SITE = ENV['PROBE_SITE']
 MASTER_HOST = ENV['MASTER_HOST']
 MASTER_PORT = ENV['MASTER_PORT']
 PROBE_SECRET = ENV['PROBE_SECRET']
+USE_SSL = ENV['USE_SSL'] || false
 
 # URL Actions
 get '/' do
@@ -36,7 +37,13 @@ get '/healthcheck' do
 end
 
 def send_pang
-  uri = URI("#{MASTER_HOST}:#{MASTER_PORT}/pang")
+  if USE_SSL
+    url = "https://#{MASTER_HOST}:#{MASTER_PORT}"
+  else
+    url = "http://#{MASTER_HOST}:#{MASTER_PORT}"
+  end
+
+  uri = URI("#{url}/pang")
   begin
     res = Net::HTTP.post_form(uri, 'name' => 'pang',
                                    'site' => PROBE_SITE,
@@ -47,14 +54,20 @@ def send_pang
     else
       return false
     end
-  rescue
-    LOGGER.error("send_pang timed out")
+  rescue => e
+    LOGGER.error("send_pang timed out - #{e.message}")
     return false
   end
 end
 
 def get_probe_sites
-  uri = URI("#{MASTER_HOST}:#{MASTER_PORT}/get_probes")
+  if USE_SSL
+    url = "https://#{MASTER_HOST}:#{MASTER_PORT}"
+  else
+    url = "http://#{MASTER_HOST}:#{MASTER_PORT}"
+  end
+
+  uri = URI("#{url}/get_probes")
   probe_sites = {}
 
   begin
@@ -73,7 +86,12 @@ end
 def send_ping_metric(ping_vals)
   LOGGER.debug("Sending ping metric")
   LOGGER.debug("METRIC: #{ping_vals}")
-  uri = URI("#{MASTER_HOST}:#{MASTER_PORT}/send_metric")
+  if USE_SSL
+    url = "https://#{MASTER_HOST}:#{MASTER_PORT}"
+  else
+    url = "http://#{MASTER_HOST}:#{MASTER_PORT}"
+  end
+  uri = URI("#{url}/send_metric")
 
   begin
     res = Net::HTTP.post_form(uri, 'name' => 'ping',
@@ -97,7 +115,12 @@ end
 
 def send_traceroute_metric(site, ip, traceroute_out)
   LOGGER.info("Sending traceroute metric")
-  uri = URI("#{MASTER_HOST}:#{MASTER_PORT}/send_metric")
+  if USE_SSL
+    url = "https://#{MASTER_HOST}:#{MASTER_PORT}"
+  else
+    url = "http://#{MASTER_HOST}:#{MASTER_PORT}"
+  end
+  uri = URI("#{url}/send_metric")
   LOGGER.debug("URL: #{uri}")
 
   begin

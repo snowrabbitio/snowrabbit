@@ -1,4 +1,4 @@
-FROM ruby:2.6-alpine3.11
+FROM ruby:3.3-alpine
 MAINTAINER me@jason.camp
 
 # Copy in application
@@ -14,12 +14,9 @@ RUN apk add make gcc g++
 RUN apk add sqlite sqlite-dev sqlite-libs sqlite-static
 RUN apk add mariadb-client mariadb-dev mariadb-embedded-dev mariadb-connector-c
 
-# Install some rubygems
-RUN gem install sinatra
-RUN gem install sqlite3
-RUN gem install mysql2
-#RUN gem install pg
-RUN gem install sequel
-
 WORKDIR /app
+
+# Install some rubygems
+RUN bundle install
+
 CMD /app/master.rb
