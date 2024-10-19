@@ -5,8 +5,6 @@ APP=probe
 
 CONTROLLER_HOST=controller.snowrabbit.io
 CONTROLLER_PORT=8091
-PROBE_SECRET=p0ai8jxb1dwm7oes9q5gy24rhvu6l3tn
-PROBE_SITE=do-nyc1
 
 case $1 in
   build)
