@@ -1,10 +1,11 @@
 FROM ruby:3.3-alpine
-MAINTAINER me@jason.camp
+LABEL maintainer="me@jason.camp"
 
+# Create app dir
 RUN mkdir /app
-ADD src /app/
+ADD Gemfile /app
 
-# Development testing
+# Build Deps
 RUN apk update
 RUN apk add make gcc g++
 RUN apk add sqlite sqlite-dev sqlite-libs sqlite-static
@@ -14,9 +15,7 @@ WORKDIR /app
 # Install some rubygems
 RUN bundle install
 
-RUN gem install sinatra
-RUN gem install sqlite3
-RUN gem install net-ping
-RUN gem install mixlib-shellout
+# Copy in application
+ADD src /app/
 
-CMD /app/probe.rb
+CMD [ "/app/probe.rb" ]

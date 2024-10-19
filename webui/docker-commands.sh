@@ -19,7 +19,7 @@ case $1 in
 
   stop)
     echo "STOP"
-    docker stop $DOCKER_ID-$APP
+    docker stop $APP
     ;;
 
   restart)
