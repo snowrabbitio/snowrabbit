@@ -33,7 +33,22 @@ ADMIN_PASS = ENV['ADMIN_PASS']
 
 # Set up logger
 LOGGER = Logger.new(STDOUT)
-LOGGER_LEVEL = ENV['LOGGER_LEVEL'].nil? ? "info" : ENV['LOGGER_LEVEL']
+LOGGER_LEVEL = case ENV['LOGGER_LEVEL'].to_s.downcase
+            when "debug"
+              Logger::DEBUG
+            when "info"
+              Logger::INFO
+            when "warn"
+              Logger::WARN
+            when "error"
+              Logger::ERROR
+            when "fatal"
+              Logger::FATAL
+            else
+              Logger::INFO
+            end
+
+# Set the logger level
 LOGGER.level = LOGGER_LEVEL
 LOGGER.info("Logger Level: #{LOGGER_LEVEL}")
 
@@ -62,7 +77,7 @@ elsif DB_TYPE == "mysql"
     LOGGER.debug("DB_DATABASE: #{DB_DATABASE}")
   end
 
-  DB_CONNECTION = Sequel.mysql2(DB_DATABASE, user: DB_USER,  password: DB_PASS, host: DB_HOST, port: DB_PORT)
+  DB_CONNECTION = Sequel.mysql2(DB_DATABASE, user: DB_USER,  password: DB_PASS, host: DB_HOST, port: DB_PORT, loggers: [Logger.new($stdout)])
 else
   LOGGER.error("Could not determine DB_TYPE, exiting!")
   exit 1
@@ -72,7 +87,7 @@ end
 unless DB_CONNECTION.table_exists?(:ping_metrics)
   DB_CONNECTION.create_table :ping_metrics do
     primary_key :id
-    column :timestamp, Integer
+    column :timestamp, DateTime
     column :source_site, String
     column :dest_site, String
     column :dest_ip, String
@@ -89,7 +104,7 @@ end
 unless DB_CONNECTION.table_exists?(:traceroute_metrics)
   DB_CONNECTION.create_table :traceroute_metrics do
     primary_key :id
-    column :timestamp, Integer
+    column :timestamp, DateTime
     column :source_site, String
     column :dest_site, String
     column :dest_ip, String
@@ -140,7 +155,7 @@ get '/admin/probe_list' do
   @probes_unregistered = DB_CONNECTION[:probes].where(active: 2)
   @probes_inactive = DB_CONNECTION[:probes].where(active: 0)
   @colors = ['maroon', 'purple', 'gunmetal', 'lavender', 'spanish-gray']
-  @locations = ['US', 'EU', 'APAC']
+  @locations = ['US', 'EU', 'APAC', 'AU']
 
   erb :admin_probe_list
 end
@@ -178,13 +193,47 @@ end
 get '/matrix' do
   # Get all of the latest ping times and display
   @begin_time = Time.now
-  @probes_list = DB_CONNECTION[:probes].where(active: 1).order(Sequel.desc(:location), Sequel.asc(:site))
-  if @probes_list.count > 0
-    @probe_last_seen = @probes_list.order(Sequel.desc(:last_seen)).first[:last_seen]
-  end 
 
-  # Get the number of probes * 5 and double it just to be safe, i don't think we'll need more than that
-  @ping_table = DB_CONNECTION[:ping_metrics].limit(@probes_list.count * 5 * 2).order(Sequel.desc(:timestamp))
+  @probes_list = DB_CONNECTION[:probes].where(active: 1).order(Sequel.desc(:location), Sequel.asc(:site)).all
+  if @probes_list.count > 0
+    @probe_last_seen = 0
+    active_probes = []
+    @probes_list.each do |probe|
+      # Get the most recent last seen
+      if probe[:last_seen] > @probe_last_seen
+        @probe_last_seen = probe[:last_seen]
+      end
+
+      # Array of active probes
+      active_probes << probe[:site]
+    end
+  end
+
+  @ping_metrics = {}
+  active_probes.each do |probe|
+    # Get latest result from each site
+    subquery = DB_CONNECTION[:ping_metrics]
+               .where(source_site: probe)
+               .where(dest_site: active_probes - [probe])
+               .select_group(:dest_site)
+               .select_append{ max(:timestamp).as(:latest_timestamp) }
+
+    # Join the subquery with the original table to get the full row for the max timestamp
+    latest_dest_probes = DB_CONNECTION[:ping_metrics]
+                         .join(subquery, {
+                           Sequel[:ping_metrics][:dest_site] => Sequel[:t1][:dest_site],  # Join on dest_site
+                           Sequel[:ping_metrics][:timestamp] => Sequel[:t1][:latest_timestamp]  # Join on max timestamp
+                         }, table_alias: :t1)
+                         .select(Sequel[:ping_metrics][:dest_site], Sequel[:ping_metrics][:avg], Sequel[:ping_metrics][:timestamp])
+
+    # Convert results to hash keyed by site
+    @ping_metrics[probe] = latest_dest_probes.all.each_with_object({}) do |row, hash|
+      hash[row[:dest_site]] = {
+        avg: row[:avg],
+        timestamp: row[:timestamp]
+      }
+    end
+  end
 
   erb :matrix
 end
@@ -194,13 +243,13 @@ get '/site_details' do
   @begin_time = Time.now
   @source_site = params[:source_site]
   @dest_site = params[:dest_site]
-  @ping_metrics = DB_CONNECTION[:ping_metrics].where(source_site: @source_site, dest_site: @dest_site).limit(5).order(Sequel.desc(:timestamp))
-  traceroute_metrics = DB_CONNECTION[:traceroute_metrics].where(source_site: @source_site, dest_site: @dest_site).limit(1).order(Sequel.desc(:timestamp))
+  @ping_metrics = DB_CONNECTION[:ping_metrics].where(source_site: @source_site, dest_site: @dest_site).order(Sequel.desc(:timestamp)).limit(5)
+  traceroute_metrics = DB_CONNECTION[:traceroute_metrics].where(source_site: @source_site, dest_site: @dest_site).order(Sequel.desc(:timestamp)).first
 
-  if traceroute_metrics.count > 0
-    @traceroute_out = traceroute_metrics.first
-  else
+  if traceroute_metrics.nil?
     @traceroute_out = "No traceroute found."
+  else
+    @traceroute_out = traceroute_metrics
   end
 
   erb :site_details

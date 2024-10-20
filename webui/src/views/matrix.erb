@@ -38,41 +38,50 @@
                                                         <tr>
                                                                 <th class="corner">&nbsp;</th>
 <%
+  # Display the top header
   @probes_list.each do |probe|
 %>
-<th class="heading-<%= probe[:color] %>"><%= probe[:site] %></th>
-<% end %>
+<th class="heading-<%= probe[:color] %>"><span class="d-block" data-toggle="tooltip" data-placement="top" data-html="true" title="<span class='small d-block'><%= probe[:description] %></span>"><%= probe[:site] %></span></th>
+<%
+  end
+%>
                                                         </tr>
                                                 </thead>
 <tbody>
 <%
-  @probes_list.each do |probe|
+    # Loop through the probes
+    @probes_list.each do |probe|
 %>
 <tr>
-<th class="heading-<%= probe[:color] %>"><%= probe[:site] %></th>
+<th class="heading-<%= probe[:color] %>"><span class="d-block" data-toggle="tooltip" data-placement="top" data-html="true" title="<span class='small d-block'><%= probe[:description] %></span>"><%= probe[:site] %></span></th>
 
-<% @probes_list.each do |p| %>
-<%   if probe[:site] == p[:site] %>
-<td class="empty-box">&nbsp;</td>
 <%
-    else
-      ping_metric = @ping_table.where(source_site: p[:site], dest_site: probe[:site]).order(Sequel.desc(:timestamp)).limit(1)
-      if ping_metric.first
-        # Set cell color if needed
-        if ((Time.now.to_i - ping_metric.first[:timestamp]) > 300)
-          ping_status = "gray"
+        @probes_list.each do |p|
+            if probe[:site] == p[:site]
+%>
+    <td class="empty-box">&nbsp;</td>
+  <%
+            else
+                if @ping_metrics[p[:site]].key?(probe[:site])
+                    if (Time.now.to_i - @ping_metrics[p[:site]][probe[:site]][:timestamp].to_i) > 300
+                        ping_status = "gray"
+                    else
+                        ping_status = "" 
+                    end
+%>
+    <td class="popup-trigger <%= ping_status %>" data-toggle="modal" data-target="#resultDataModal" data-content="/site_details?source_site=<%=p[:site] %>&dest_site=<%= probe[:site] %>"><%= @ping_metrics[p[:site]][probe[:site]][:avg] %></td>
+<%
+                else
+%>
+    <td class="popup-trigger">N/A</td>
+<%
+                end
+            end 
         end
 %>
-<td class="popup-trigger <%= ping_status %>" data-toggle="modal" data-target="#resultDataModal" data-content="/site_details?source_site=<%=p[:site] %>&dest_site=<%= probe[:site] %>"><span class="d-block" data-toggle="tooltip" data-placement="top" data-html="true" title="<span class='small d-block'>Click to open popup</span>"><%= ping_metric.first[:avg] %></span></td>
-<%
-      end
-    end
-  end
-%>
 </tr>
-
 <%
-  end
+    end
 %>
 
                                                 </tbody>
@@ -80,7 +89,7 @@
 				</div>
 					<div class="px-4">
 						<div class="text-right py-1">
-							<span class="update-status small text-gray">Last Updated: <time class="font-weight-bold text-dark"><%= Time.at(@probe_last_seen).strftime('%Y-%m-%d %H:%M:%S') %> (<abbr title="<%= Time.at(@probe_last_seen).iso8601 %>" class="timeago"></abbr>)</time></span>
+							<span class="update-status small text-gray">Last Updated: <time class="font-weight-bold text-dark"><%= Time.at(@probe_last_seen).strftime('%Y-%m-%d %H:%M:%S') %> UTC (<abbr title="<%= Time.at(@probe_last_seen).iso8601 %>" class="timeago"></abbr>)</time></span>
 						</div>
 						<div class="pt-2">
 							<div class="row align-items-center justify-content-end">

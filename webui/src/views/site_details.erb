@@ -16,10 +16,6 @@
 			</thead>
 			<tbody>
 <%
-
-  last_updated_display = Time.at(@traceroute_out[:timestamp]).to_datetime.strftime('%Y-%m-%d %H:%M:%S')
-  last_updated_iso = Time.at(@traceroute_out[:timestamp]).iso8601
-
  @ping_metrics.each do |p|
   time_display = Time.at(p[:timestamp]).to_datetime.strftime('%Y-%m-%d %H:%M:%S')
 %>
@@ -37,14 +33,22 @@
 		</table>
 	</div>
 </section>
+
 <section class="pb-3">
 	<h3 class="h5 font-weight-bold text-center mb-3">Latest Traceroute</h3>
-	<div class="mb-3">
+        <% if @traceroute_out.is_a?(String) %>
+        <div class="mb-3">
+        </div>
+        <pre class="font-xs mb-0"><%= @traceroute_out %></pre>
+        <% else
+           last_updated_display = Time.at(@traceroute_out[:timestamp]).to_datetime.strftime('%Y-%m-%d %H:%M:%S')
+           last_updated_iso = Time.at(@traceroute_out[:timestamp]).iso8601
+        %>
+        <div class="mb-3">
 		<span class="update-status small text-gray">Last Updated: <time class="font-weight-bold text-dark" datetime="<%= last_updated_display%>"><%= last_updated_display %> (<abbr title="<%= last_updated_iso%>" class="timeago"></abbr>)</time></span>
 	</div>
-	<pre class="font-xs mb-0">
-          <%= @traceroute_out[:traceroute] %>
-	</pre>
+	<pre class="font-xs mb-0"><%= @traceroute_out[:traceroute] %></pre>
+        <% end %>
 
 	<div class="px-4">
 		<div class="text-right py-1 small">Page Loaded in <%= sprintf("%0.2f", Time.now - @begin_time) %> seconds.</div>

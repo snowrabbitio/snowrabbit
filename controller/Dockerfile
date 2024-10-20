@@ -9,6 +9,8 @@ ADD Gemfile /app
 RUN apk update
 RUN apk add make gcc g++
 RUN apk add sqlite sqlite-dev sqlite-libs sqlite-static
+RUN apk add mariadb-client mariadb-dev mariadb-embedded-dev mariadb-connector-c
+RUN apk add postgresql-dev
 
 WORKDIR /app
 
@@ -18,4 +20,4 @@ RUN bundle install
 # Copy in application
 ADD src /app/
 
-CMD [ "/app/probe.rb" ]
+CMD [ "/app/controller.rb" ]

@@ -1,9 +1,9 @@
-FROM ruby:2.6-alpine3.11
-MAINTAINER me@jason.camp
+FROM ruby:3.3-alpine
+LABEL maintainer="me@jason.camp"
 
-# Copy in application
+# Create app dir
 RUN mkdir /app
-ADD src /app/
+ADD Gemfile /app
 
 # Make database directory for sqlite
 RUN mkdir -p /var/lib/db
@@ -13,13 +13,14 @@ RUN apk update
 RUN apk add make gcc g++
 RUN apk add sqlite sqlite-dev sqlite-libs sqlite-static
 RUN apk add mariadb-client mariadb-dev mariadb-embedded-dev mariadb-connector-c
-
-# Install some rubygems
-RUN gem install sinatra
-RUN gem install sqlite3
-RUN gem install mysql2
-#RUN gem install pg
-RUN gem install sequel
+RUN apk add postgresql-dev
 
 WORKDIR /app
-CMD /app/webui.rb
+
+# Install some rubygems
+RUN bundle install
+
+# Copy in application
+ADD src /app/
+
+CMD [ "/app/webui.rb" ]

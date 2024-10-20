@@ -15,7 +15,22 @@ set :port, 4567
 
 # Set up logger
 LOGGER = Logger.new(STDOUT)
-LOGGER_LEVEL = ENV['LOGGER_LEVEL'].nil? ? "info" : ENV['LOGGER_LEVEL']
+LOGGER_LEVEL = case ENV['LOGGER_LEVEL'].to_s.downcase
+            when "debug"
+              Logger::DEBUG
+            when "info"
+              Logger::INFO
+            when "warn"
+              Logger::WARN
+            when "error"
+              Logger::ERROR
+            when "fatal"
+              Logger::FATAL
+            else
+              Logger::INFO
+            end
+
+# Set the logger level
 LOGGER.level = LOGGER_LEVEL
 LOGGER.info("Logger Level: #{LOGGER_LEVEL}")
 
@@ -35,16 +50,14 @@ if DB_TYPE == "sqlite"
   end
   DB_CONNECTION = Sequel.sqlite("#{DB_DATABASE_PATH}/#{DB_DATABASE}.db")
 elsif DB_TYPE == "mysql"
-  if LOGGER_LEVEL == "debug"
-    LOGGER.debug("Mysql DB Settings")
-    LOGGER.debug("-----------------")
-    LOGGER.debug("DB_USER: #{DB_USER}")
-    LOGGER.debug("DB_HOST: #{DB_HOST}")
-    LOGGER.debug("DB_PORT: #{DB_PORT}")
-    LOGGER.debug("DB_DATABASE: #{DB_DATABASE}")
-  end
+  LOGGER.debug("Mysql DB Settings")
+  LOGGER.debug("-----------------")
+  LOGGER.debug("DB_USER: #{DB_USER}")
+  LOGGER.debug("DB_HOST: #{DB_HOST}")
+  LOGGER.debug("DB_PORT: #{DB_PORT}")
+  LOGGER.debug("DB_DATABASE: #{DB_DATABASE}")
 
-  DB_CONNECTION = Sequel.mysql2(DB_DATABASE, user: DB_USER,  password: DB_PASS, host: DB_HOST, port: DB_PORT)
+  DB_CONNECTION = Sequel.mysql2(DB_DATABASE, user: DB_USER,  password: DB_PASS, host: DB_HOST, port: DB_PORT, loggers: [Logger.new($stdout)])
 else
   LOGGER.error("Could not determine DB_TYPE, exiting!")
   exit 1
@@ -54,7 +67,7 @@ end
 unless DB_CONNECTION.table_exists?(:ping_metrics)
   DB_CONNECTION.create_table :ping_metrics do
     primary_key :id
-    column :timestamp, Integer
+    column :timestamp, DateTime
     column :source_site, String
     column :dest_site, String
     column :dest_ip, String
@@ -71,7 +84,7 @@ end
 unless DB_CONNECTION.table_exists?(:traceroute_metrics)
   DB_CONNECTION.create_table :traceroute_metrics do
     primary_key :id
-    column :timestamp, Integer
+    column :timestamp, DateTime
     column :source_site, String
     column :dest_site, String
     column :dest_ip, String
@@ -93,6 +106,8 @@ unless DB_CONNECTION.table_exists?(:probes)
     column :color, String
     column :secret, String
     column :active, Integer
+    index [ :site, :active ]
+    index [ :active ]
   end
 end
 
@@ -123,11 +138,11 @@ post '/pang' do
 
   if pang_authed
     # See if we need to update the IP address, sometimes it can be different
-    probe_ip = DB_CONNECTION[:probes].where(site: params[:site])
-    if probe_ip.first[:ip] != request.ip
-       LOGGER.info("Updating IP for site #{params[:site]} to #{request.ip}")
-       DB_CONNECTION[:probes].where(site: params[:site]).update(ip: request.ip)
-    end
+#    probe_ip = DB_CONNECTION[:probes].where(site: params[:site])
+#    if probe_ip.first[:ip] != request.ip
+#       LOGGER.info("Updating IP for site #{params[:site]} to #{request.ip}")
+#       DB_CONNECTION[:probes].where(site: params[:site]).update(ip: request.ip)
+#    end
 
     'OK'
   else
@@ -149,7 +164,7 @@ post '/send_metric' do
   metric.source_site = params[:source_site]
   metric.dest_site = params[:site]
   metric.ip = params[:ip]
-  metric.timestamp = params[:time]
+  metric.timestamp = params[:time].to_i
   metric.secret = params[:secret]
 
   if metric.name == "ping"
@@ -180,7 +195,7 @@ post '/send_metric' do
     if metric.name == "ping"
       LOGGER.debug("Saving ping metric")
       table = DB_CONNECTION[:ping_metrics]
-      table.insert(timestamp: metric.timestamp,
+      table.insert(timestamp: Time.at(metric.timestamp),
                    source_site: metric.source_site,
                    dest_site: metric.dest_site,
                    dest_ip: metric.ip,
@@ -198,7 +213,7 @@ post '/send_metric' do
     elsif metric.name == "traceroute"
       LOGGER.debug("Saving traceroute metric")
       table = DB_CONNECTION[:traceroute_metrics]
-      table.insert(timestamp: metric.timestamp,
+      table.insert(timestamp: Time.at(metric.timestamp),
                    source_site: metric.source_site,
                    dest_site: metric.dest_site,
                    dest_ip: metric.ip,
