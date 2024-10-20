@@ -38,7 +38,8 @@ function initDataSubmit() {
 			success: function(response) {
 				$('.preloader').hide();
 				let alert = $('#formResultAlert');
-				alert.find('.text').html(response);
+                                let cleanResponse = DOMPurify.sanitize(response);
+				alert.find('.text').html(cleanResponse);
 				alert.show().addClass('active');
 				alert.find('[aria-label="Close"]').on('click', function(e) {
 					alert.removeClass('active');
@@ -101,7 +102,8 @@ function initPopup() {
 				modal.find('.content').html('<span class="d-block text-center">Loading...</span>');
 			},
 			success: function(response) {
-				modal.find('.content').html(response);
+                                let cleanResponse = DOMPurify.sanitize(response);
+				modal.find('.content').html(cleanResponse);
 			}
 		});
 	});
