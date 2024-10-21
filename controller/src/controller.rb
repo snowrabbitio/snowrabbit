@@ -1,37 +1,36 @@
 #!/usr/bin/env ruby
 
 $stdout.sync = true
-require 'sinatra'
-require 'ostruct'
-require 'logger'
-require 'sqlite3'
-require 'mysql2'
-require 'sequel'
-require 'json'
+require "sinatra"
+require "ostruct"
+require "logger"
+require "sqlite3"
+require "mysql2"
+require "sequel"
+require "json"
 
-require_relative 'common/logger'
-require_relative 'common/database'
+require_relative "common/logger"
+require_relative "common/database"
 
 # Set sinatra config
-set :bind, '0.0.0.0'
+set :bind, "0.0.0.0"
 set :port, 4567
 
 # Set up logger
 LOGGER = setup_logger
 
-
 # URL Actions
-get '/' do
-  'Snowrabbit'
+get "/" do
+  "Snowrabbit"
 end
 
-post '/pang' do
+post "/pang" do
   # This will validate that a probe can reach the master and validates its secret
   # See if this probe is registered
   db_conn = db_connect
 
   begin
-    probes_registered= db_conn[:probes].where(site: params[:site], active: 0..1)
+    probes_registered = db_conn[:probes].where(site: params[:site], active: 0..1)
     probes_unregistered = db_conn[:probes].where(site: params[:site], active: 2)
 
     # See if this site is registered or unregistered
@@ -48,27 +47,27 @@ post '/pang' do
     end
 
     if pang_authed
-    # See if we need to update the IP address, sometimes it can be different
-#    probe_ip = DB_CONNECTION[:probes].where(site: params[:site])
-#    if probe_ip.first[:ip] != request.ip
-#       LOGGER.info("Updating IP for site #{params[:site]} to #{request.ip}")
-#       DB_CONNECTION[:probes].where(site: params[:site]).update(ip: request.ip)
-#    end
-      'OK'
+      # See if we need to update the IP address, sometimes it can be different
+      #    probe_ip = DB_CONNECTION[:probes].where(site: params[:site])
+      #    if probe_ip.first[:ip] != request.ip
+      #       LOGGER.info("Updating IP for site #{params[:site]} to #{request.ip}")
+      #       DB_CONNECTION[:probes].where(site: params[:site]).update(ip: request.ip)
+      #    end
+      "OK"
     else
       status 401
-       'Unauthorized'
+      "Unauthorized"
     end
   ensure
     db_conn.disconnect
   end
 end
 
-get '/send_metric' do
-  'Error, must POST to this endpoint'
+get "/send_metric" do
+  "Error, must POST to this endpoint"
 end
 
-post '/send_metric' do
+post "/send_metric" do
   # Accepts a metric from a probe
   LOGGER.debug("Starting send_metric")
   db_conn = db_connect
@@ -90,7 +89,7 @@ post '/send_metric' do
       metric.min = params[:min]
       metric.avg = params[:avg]
       metric.max = params[:max]
-    elsif metric.name = "traceroute"
+    elsif metric.name == "traceroute"
       metric.traceroute = params[:traceroute]
     end
 
@@ -99,11 +98,11 @@ post '/send_metric' do
     if !probe_secret
       LOGGER.debug("No secret found for site #{metric.source_site}")
       status 401
-      'Forbidden'   
-    elsif (metric.secret != probe_secret[:secret])
+      "Forbidden"
+    elsif metric.secret != probe_secret[:secret]
       LOGGER.debug("secret failed, ignoring...")
       status 401
-      'Forbidden'
+      "Forbidden"
     elsif metric.secret == probe_secret[:secret]
       LOGGER.debug("secret succeeded, continuing")
       LOGGER.debug("VALUE: #{metric}")
@@ -112,36 +111,36 @@ post '/send_metric' do
         LOGGER.debug("Saving ping metric")
         table = db_conn[:ping_metrics]
         table.insert(timestamp: Time.at(metric.timestamp),
-                     source_site: metric.source_site,
-                     dest_site: metric.dest_site,
-                     dest_ip: metric.ip,
-                     transmitted: metric.transmitted,
-                     received: metric.received,
-                     packet_loss: metric.packet_loss,
-                     min: metric.min,
-                     avg: metric.avg,
-                     max: metric.max)
+          source_site: metric.source_site,
+          dest_site: metric.dest_site,
+          dest_ip: metric.ip,
+          transmitted: metric.transmitted,
+          received: metric.received,
+          packet_loss: metric.packet_loss,
+          min: metric.min,
+          avg: metric.avg,
+          max: metric.max)
 
         # Mark that we got a metric from this probe
-        db_conn[:probes].where(site: metric.source_site).update(last_seen: Time.now().to_i)
+        db_conn[:probes].where(site: metric.source_site).update(last_seen: Time.now.to_i)
 
-        'OK'
+        "OK"
       elsif metric.name == "traceroute"
         LOGGER.debug("Saving traceroute metric")
         table = db_conn[:traceroute_metrics]
         table.insert(timestamp: Time.at(metric.timestamp),
-                     source_site: metric.source_site,
-                     dest_site: metric.dest_site,
-                     dest_ip: metric.ip,
-                     traceroute: metric.traceroute)
+          source_site: metric.source_site,
+          dest_site: metric.dest_site,
+          dest_ip: metric.ip,
+          traceroute: metric.traceroute)
 
         # Mark that we got a metric from this probe
-        db_conn[:probes].where(site: metric.source_site).update(last_seen: Time.now().to_i)
+        db_conn[:probes].where(site: metric.source_site).update(last_seen: Time.now.to_i)
 
-        'OK'
+        "OK"
       else
         status 401
-        'Forbidden'
+        "Forbidden"
       end
     end
   ensure
@@ -149,8 +148,7 @@ post '/send_metric' do
   end
 end
 
-
-post '/get_probes' do
+post "/get_probes" do
   db_conn = db_connect
   begin
     probes = db_conn[:probes].where(active: 1)
@@ -164,21 +162,18 @@ post '/get_probes' do
   end
 end
 
-
-post '/register_probe' do
+post "/register_probe" do
   # register probe
   # move active status from 2 to 1 and set a secret
   db_conn = db_connect
   begin
     db_conn[:probes].where(site: params[:site]).update(secret: params[:secret], active: 1)
-    'Probe registered'
+    "Probe registered"
   ensure
     db_conn.disconnect
   end
 end
 
-
-get '/healthcheck' do
-  'OK'
+get "/healthcheck" do
+  "OK"
 end
-
