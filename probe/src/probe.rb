@@ -9,37 +9,21 @@ require 'mixlib/shellout'
 require 'ostruct'
 require 'json'
 
-# Set up logger
-LOGGER = Logger.new(STDOUT)
-LOGGER_LEVEL = case ENV['LOGGER_LEVEL'].to_s.downcase
-            when "debug"
-              Logger::DEBUG
-            when "info"
-              Logger::INFO
-            when "warn"
-              Logger::WARN
-            when "error"
-              Logger::ERROR
-            when "fatal"
-              Logger::FATAL
-            else
-              Logger::INFO
-            end
+require_relative 'common/logger'
 
-# Set the logger level
-LOGGER.level = LOGGER_LEVEL
-LOGGER.info("Logger Level: #{LOGGER_LEVEL}")
+# Set up logger
+LOGGER = setup_logger
 
 PROBE_SITE = ENV['PROBE_SITE']
 CONTROLLER_HOST = ENV['CONTROLLER_HOST']
 CONTROLLER_PORT = ENV['CONTROLLER_PORT']
 PROBE_SECRET = ENV['PROBE_SECRET']
 PROBE_INTERVAL = ENV['PROBE_INTERVAL'].to_i > 0 ? ENV['PROBE_INTERVAL'].to_i : 60
-USE_SSL = ENV['USE_SSL'] || false
+PROBE_USE_SSL = ENV['PROBE_USE_SSL'] || false
 
 def get_url
   url = "http://#{CONTROLLER_HOST}"
-  if USE_SSL
+  if PROBE_USE_SSL
     url = "https://#{CONTROLLER_HOST}"
   end
 
