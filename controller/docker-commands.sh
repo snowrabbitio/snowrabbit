@@ -39,6 +39,9 @@ case $1 in
   push)
     echo "PUSH"
     docker push $DOCKER_ID/$APP
+    DT=`date +"%Y%m%d%H%M%S"`
+    docker tag $DOCKER_ID/$APP:latest $DOCKER_ID/$APP:$DT
+    docker push $DOCKER_ID/$APP:$DT
     ;;
 
   pull)
