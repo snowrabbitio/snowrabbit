@@ -9,6 +9,8 @@ CONTROLLER_PORT=8091
 case $1 in
   build)
     echo "BUILD"
+    rm -rf src/common
+    cp -r ../common src
     docker build -t $DOCKER_ID/$APP .
     ;;
 

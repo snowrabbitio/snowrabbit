@@ -1,9 +1,9 @@
-source 'https://rubygems.org'
+source "https://rubygems.org"
 
-ruby '3.3.5'
+ruby "3.3.5"
 
-gem 'sinatra'
-gem 'rackup'
-gem 'sqlite3'
-gem 'net-ping'
-gem 'mixlib-shellout'
+gem "sinatra"
+gem "rackup"
+gem "sqlite3"
+gem "net-ping"
+gem "mixlib-shellout"
