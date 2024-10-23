@@ -1,4 +1,4 @@
-FROM ruby:3.3-alpine
+FROM ruby:3.3-alpine3.20
 LABEL maintainer="me@jason.camp"
 
 # Create app dir
@@ -16,6 +16,7 @@ WORKDIR /app
 
 # Install some rubygems
 RUN bundle install
+RUN gem list
 
 # Copy in application
 ADD src /app/

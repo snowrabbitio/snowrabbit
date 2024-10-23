@@ -4,7 +4,8 @@ DOCKER_ID=snowrabbitio
 APP=probe
 
 CONTROLLER_HOST=controller.snowrabbit.io
-CONTROLLER_PORT=8091
+CONTROLLER_PORT=443
+PROBE_USE_SSL=true
 
 case $1 in
   build)
@@ -14,10 +15,17 @@ case $1 in
     docker build -t $DOCKER_ID/$APP .
     ;;
 
+  build-nocache)
+    echo "BUILD NOCACHE"
+    rm -rf src/common
+    cp -r ../common src
+    docker build --no-cache -t $DOCKER_ID/$APP .
+    ;;
+
   start|run)
     echo "RUN"
     #### REMOVED --rm
-    docker run --name $APP -d -eCONTROLLER_HOST=$CONTROLLER_HOST -eCONTROLLER_PORT=$CONTROLLER_PORT -ePROBE_SITE=$PROBE_SITE -ePROBE_SECRET=$PROBE_SECRET -ePROBE_INTERVAL=$PROBE_INTERVAL $DOCKER_ID/$APP
+    docker run --name $APP -d -eCONTROLLER_HOST=$CONTROLLER_HOST -eCONTROLLER_PORT=$CONTROLLER_PORT -ePROBE_SITE=$PROBE_SITE -ePROBE_SECRET=$PROBE_SECRET -ePROBE_INTERVAL=$PROBE_INTERVAL -ePROBE_USE_SSL=$PROBE_USE_SSL $DOCKER_ID/$APP
     ;;
 
   stop)

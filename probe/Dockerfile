@@ -1,4 +1,4 @@
-FROM ruby:3.3-alpine
+FROM ruby:3.3-alpine3.20
 LABEL maintainer="me@jason.camp"
 
 # Create app dir

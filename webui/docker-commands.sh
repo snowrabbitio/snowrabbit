@@ -11,6 +11,13 @@ case $1 in
     docker build -t $DOCKER_ID/$APP .
     ;;
 
+  build-nocache)
+    echo "BUILD NOCACHE"
+    rm -rf src/common
+    cp -r ../common src
+    docker build --no-cache -t $DOCKER_ID/$APP .
+    ;;
+
   start|run)
     echo "RUN"
     #### Removed --rm
