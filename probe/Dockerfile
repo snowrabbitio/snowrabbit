@@ -7,6 +7,7 @@ ADD Gemfile /app
 
 # Build Deps
 RUN apk update
+RUN apk upgrade --no-cache
 RUN apk add make gcc g++
 RUN apk add sqlite sqlite-dev sqlite-libs sqlite-static
 
