@@ -12,12 +12,12 @@ require "json"
 require_relative "common/logger"
 require_relative "common/database"
 
+# Set up logger
+LOGGER = setup_logger
+
 # Set sinatra config
 set :bind, "0.0.0.0"
 set :port, 4567
-
-# Set up logger
-LOGGER = setup_logger
 
 # URL Actions
 get "/" do
