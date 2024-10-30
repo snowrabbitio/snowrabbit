@@ -74,7 +74,6 @@ post "/admin/probe_update" do
 end
 
 post "/get_probes" do
-
   probes = DB[:probes].where(active: 1)
   probes_out = {}
   probes.each do |p|
