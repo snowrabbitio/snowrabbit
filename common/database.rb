@@ -1,5 +1,10 @@
 # database.rb - database related methods
 
+require_relative "logger"
+
+# Set up logger
+LOGGER = setup_logger
+
 def db_get_settings
   db_settings = {}
 
