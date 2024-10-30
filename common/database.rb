@@ -28,6 +28,8 @@ def db_connect
       password: db_settings["db_pass"],
       host: db_settings["db_host"],
       port: db_settings["db_port"],
+      max_connections: 10,
+      timeout: 5000,
       loggers: [Logger.new($stdout)]) # Temporary to log sql statements
   else
     LOGGER.error("Could not determine DB_TYPE, exiting!")
