@@ -163,4 +163,3 @@ end
 at_exit do
   DB.disconnect
 end
-
